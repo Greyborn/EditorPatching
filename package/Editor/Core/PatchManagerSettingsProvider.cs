@@ -19,6 +19,7 @@ using UnityEngine;
 
 using Debug = UnityEngine.Debug;
 using Object = UnityEngine.Object;
+using PackageInfo = UnityEditor.PackageManager.PackageInfo;
 
 namespace needle.EditorPatching
 {
@@ -173,9 +174,10 @@ namespace needle.EditorPatching
          var title = PatchManager.IsWaitingForLoad(patch.Id) ? $"{patch.Name} [loading]" : patch.Name;
 
          rect.xMin = toggleRect.xMax + 4;
+         EditorGUIUtility.AddCursorRect(rect, MouseCursor.Link);
          if (GUI.Button(rect, title, oldValue ? Style.PatchActive : Style.PatchInactive))
          {
-            PingPackage(patch);
+            PingPatchFileOrAssembly(patch);
          }
 
          using (new EditorGUI.DisabledScope(!oldValue))
@@ -224,23 +226,83 @@ namespace needle.EditorPatching
          }
       }
 
-      private static void PingPackage(IManagedPatch patch)
+      private static void LogFoundInAssembly(IManagedPatch patch, string searchString, Object context)
       {
-         Debug.LogWarning($"PING {patch.Id}");
+         Debug.LogFormat(
+            LogType.Log,
+            LogOption.NoStacktrace,
+            context,
+            $"The \"{patch.Name}\" patch was found in the \"{searchString}\" assembly.");
+      }
 
+      private static void LogFoundInPackage(IManagedPatch patch, PackageInfo packageInfo, Object context)
+      {
+         Debug.LogFormat(
+            LogType.Log,
+            LogOption.NoStacktrace,
+            context,
+            $"The \"{patch.Name}\" patch was found in the \"{packageInfo.displayName}\" package.");
+      }
+
+      private static void LogNotFound(IManagedPatch patch)
+      {
+         Debug.LogFormat(
+            LogType.Warning,
+            LogOption.NoStacktrace,
+            null,
+            $"Unable to locate the \"{patch.Id}\" patch.\n    Group: {patch.Group}\n    Name: {patch.Name}\n    Description: {patch.Description}");
+      }
+
+      private static void PingPatchFileOrAssembly(IManagedPatch patch)
+      {
          if (PatchManager.TryGetFilePathForPatch(patch.Id, out var path))
          {
+            // The patch is in a standard script Asset.
             EditorGUIUtility.PingObject(AssetDatabase.LoadAssetAtPath<Object>(path));
+            return;
          }
-         else
+
+         var type = Type.GetType(patch.Id);
+         if (type == null)
          {
-            Debug.LogFormat(
-               LogType.Log,
-               LogOption.NoStacktrace,
-               null,
-               "Clicked " + patch.Id + ". File location is unknown.\nGroup: " + patch.Group + "\nName: "
-               + patch.Name + "\nDescription: " + patch.Description);
+            Debug.LogError($"Unable to get type from patch ID: \"{patch.Id}\"");
+            return;
          }
+
+         var searchString = type.Assembly.GetName().Name;
+         var assets = AssetDatabase.FindAssets(searchString, new[] { "Packages" });
+         if (assets.Length <= 0)
+         {
+            // Assembly wasn't found among Packages.
+            LogNotFound(patch);
+            return;
+         }
+
+         if (assets.Length > 1)
+         {
+            Debug.LogWarning($"Multiple package assets match \"{searchString}\"");
+         }
+
+         var assemblyPath = AssetDatabase.GUIDToAssetPath(assets[0]);
+         var assemblyAsset = AssetDatabase.LoadAssetAtPath<Object>(assemblyPath);
+         if (assemblyAsset != null)
+         {
+            EditorGUIUtility.PingObject(assemblyAsset);
+            LogFoundInAssembly(patch, searchString, assemblyAsset);
+            return;
+         }
+
+         // The assembly couldn't be pinged. Try the package.
+         var packageInfo = PackageInfo.FindForAssetPath(assemblyPath);
+         var packageAsset = AssetDatabase.LoadAssetAtPath<Object>(packageInfo.assetPath);
+         if (packageAsset != null)
+         {
+            EditorGUIUtility.PingObject(packageAsset);
+            LogFoundInPackage(patch, packageInfo, packageAsset);
+            return;
+         }
+
+         LogNotFound(patch);
       }
 
       private IDictionary<string, IList<IManagedPatch>> GetSorted(IEnumerable<IManagedPatch> patches)
