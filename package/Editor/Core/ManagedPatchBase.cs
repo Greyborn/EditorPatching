@@ -39,10 +39,10 @@ namespace needle.EditorPatching
             }
         }
 
-        public void EnablePatch(bool forceSync = false)
+        public void EnablePatch(bool forceSave = false)
         {
             if (IsActive) return;
-            if(forceSync) HandleActivationRequestNow();
+            if(forceSave) HandleActivationRequestNow();
             else HandleActivationRequest();
         }
 
