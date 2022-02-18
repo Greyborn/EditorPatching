@@ -374,7 +374,7 @@ namespace needle.EditorPatching
 					task = ApplyPatch(instance, info, WaitingForActivation);
 					harmonyPatches.Add(patchID, instance);
 					patchProviders[patchID].Instance.OnEnabledPatch();
-					if(forceSave && patchProviders[patchID].Instance.Persistent())
+					if(forceSave || patchProviders[patchID].Instance.Persistent())
 						PatchManagerSettings.SetPersistentActive(patchID, true);
 					InternalMarkChanged();
 				} 
