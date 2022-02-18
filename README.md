@@ -1,3 +1,30 @@
+# Harmony Editor Patching
+
+This project is forked from [needle-tools/editorpatching](https://github.com/needle-tools/editorpatching).
+
+***It currently depends on private library references, and direct use is not recommended. The original Needle project is recommended over this one.***
+
+While it includes mostly aesthetic tweaks, there are a few fixes:
+
+- `EditorPatchProvider` patch state is now saved correctly.
+- The "ping" method now attempts to locate the patch file, assembly, or package before generating a failure log message.
+
+Aesthetic changes include:
+- Harmony assembly infomation now appears in the panel header.
+- Patch metadata was moved from a tooltip to a featured box below the patch name.
+- Patch name functions as a button to ping the patch file or assembly, and the mouse cursor now changes when hovering over the label.
+- The location of the provider in the Project Settings window changed from "Needle/Editor Patching" to "Harmony".
+- The settings filename changed "EditorPatchingSettings" to "HarmonyPatchSettings".
+
+![Usage Examples](.github/Images/customize-layout.png)
+
+> **NOTE**: The `SlideToggle` control is from a package that's currently in a private registry. While it will likely be made public at some point, in the meantime, the control could easily be replaced with another control, such as `GUI.Toggle(rect, oldValue, string.Empty)`).
+
+
+-----
+
+# Original README
+
 ## How to Install
 
 <details>
