@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace needle.EditorPatching
 {
-	[FilePath("ProjectSettings/EditorPatchingSettings.asset", FilePathAttribute.Location.ProjectFolder)]
+	[FilePath("ProjectSettings/HarmonyPatchSettings.asset", FilePathAttribute.Location.ProjectFolder)]
 	internal class PatchManagerSettings : ScriptableSingleton<PatchManagerSettings>
 	{
 		public bool DebugLog;

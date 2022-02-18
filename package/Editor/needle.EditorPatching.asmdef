@@ -1,8 +1,8 @@
 {
     "name": "needle.EditorPatching",
-    "rootNamespace": "",
     "references": [
-        "pfc.EditorPatching.Runtime"
+        "pfc.EditorPatching.Runtime",
+        "Greyborn.Library.Imgui.Editor"
     ],
     "includePlatforms": [
         "Editor"
