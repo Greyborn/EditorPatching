@@ -48,9 +48,9 @@ namespace needle.EditorPatching
         public Exception EnableException;
         
         
-        public void EnablePatch(bool forceSave = false)
+        public void EnablePatch(bool forceSync = false)
         {
-            this.Enable(forceSave);
+            this.Enable(forceSync);
         }
 
         public void DisablePatch()
@@ -74,9 +74,9 @@ namespace needle.EditorPatching
 
         public bool GetIsActive() => PatchManager.PatchIsActive(this);
 
-        public Task<bool> Enable(bool forceSave = true)
+        public Task<bool> Enable(bool updatePersistentState = true)
         {
-            return PatchManager.EnablePatch(this, forceSave);
+            return PatchManager.EnablePatch(this, updatePersistentState);
         }
 
         public Task Disable(bool fast = false, bool updatePersistentState = true)

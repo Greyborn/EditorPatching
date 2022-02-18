@@ -337,21 +337,21 @@ namespace needle.EditorPatching
 
 		public static bool SuppressAllExceptions = false;
 
-		public static Task<bool> EnablePatch(EditorPatchProvider patchProvider, bool forceSave = true)
+		public static Task<bool> EnablePatch(EditorPatchProvider patchProvider, bool enablePersistent = true)
 		{
 			var patchType = patchProvider.ID();
-			return EnablePatch(patchType, forceSave);
+			return EnablePatch(patchType, enablePersistent);
 		}
 
-		public static Task<bool> EnablePatch(Type patchType, bool forceSave = true)
+		public static Task<bool> EnablePatch(Type patchType, bool enablePersistent = true)
 		{
 			var patchID = patchType.FullName;
 			if (patchID == null) return CompletedTaskFailed;
-			var t = EnablePatch(patchID, forceSave);
+			var t = EnablePatch(patchID, enablePersistent);
 			return t;
 		}
 
-		public static Task<bool> EnablePatch(string patchID, bool forceSave = true)
+		public static Task<bool> EnablePatch(string patchID, bool enablePersistent = true)
 		{ 
 			SetHarmonyDebugState(AllowDebugLogs);
 
@@ -374,7 +374,7 @@ namespace needle.EditorPatching
 					task = ApplyPatch(instance, info, WaitingForActivation);
 					harmonyPatches.Add(patchID, instance);
 					patchProviders[patchID].Instance.OnEnabledPatch();
-					if(forceSave || patchProviders[patchID].Instance.Persistent())
+					if(enablePersistent && patchProviders[patchID].Instance.Persistent())
 						PatchManagerSettings.SetPersistentActive(patchID, true);
 					InternalMarkChanged();
 				} 
@@ -393,7 +393,7 @@ namespace needle.EditorPatching
 				if (!patch.IsActive)
 				{
 					patch.EnablePatch(patchID.EndsWith(nameof(HarmonyInstanceRegistry)));
-					if(forceSave)
+					if(enablePersistent)
 						PatchManagerSettings.SetPersistentActive(patchID, true);
 					InternalMarkChanged();
 				}
