@@ -44,10 +44,7 @@ namespace needle.EditorPatching
          try
          {
             // PatchManagerSettings.instance.Save();
-            return new PatchManagerSettingsProvider(
-               "Project/Harmony",
-               SettingsScope.Project,
-               new[] { "patching" });
+            return new PatchManagerSettingsProvider("Project/Harmony Editor Patching", SettingsScope.Project);
          }
          catch (Exception e)
          {
